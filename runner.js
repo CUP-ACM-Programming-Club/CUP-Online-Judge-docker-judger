@@ -242,11 +242,11 @@ module.exports = async options => {
         if (options.compile_method) {
 
             let compile_arg = options.compile_method(options.program, getSandboxedPath,...options.compile_args);
-            let cmd = [SANDBOX_COMPILE_PATH, compile_arg.join(" ")]
+            let cmd = [SANDBOX_COMPILE_PATH, compile_arg.join(" ")];
             let compile = await container.execAsync({
                 Cmd: cmd
             });
-            console.log(cmd);
+            //console.log(cmd);
             Promise.promisifyAll(compile);
             await compile.startAsync();
             let compileDaemon;
@@ -258,7 +258,7 @@ module.exports = async options => {
             compile_out = await (async () => {
                 let result;
                 let tmp = await getFile(SANDBOX_COMPILE_PATH + ".out");
-                console.log(SANDBOX_COMPILE_PATH + ".out");
+                //console.log(SANDBOX_COMPILE_PATH + ".out");
                 if (tmp && tmp.data) result = tmp.data.toString();
                 return result;
             })();
@@ -268,7 +268,8 @@ module.exports = async options => {
                 if (tmp && tmp.data) result = tmp.data.toString();
                 return result;
             })();
-            if(compile_out && compile_out.length || (compile_error && compile_error.length))
+            if(compile_error && compile_error.length &&
+                ~compile_error.indexOf("error"))
             {
                 container.removeAsync({
                     force: true
@@ -302,7 +303,7 @@ module.exports = async options => {
                 options.process_limit.toString(),
                 SANDBOX_RESULT_PATH
             ];
-            console.log(cmd);
+            //console.log(cmd);
             let exec = await container.execAsync({
                 Cmd: cmd,
                 AttachStdout: true,
@@ -344,9 +345,9 @@ module.exports = async options => {
             }
             let output_file, loop_time = 0;
             const total_time = options.time_limit + options.time_limit_reserve;
-            console.log(total_time);
+            //console.log(total_time);
             output_file = await (async () => {
-                console.log(`looping:${loop_time}`);
+                //console.log(`looping:${loop_time}`);
                 let output_file;
                 let tmp = await getFile(options.file_stdout[i]);
                 if (tmp && tmp.data) output_file = tmp.data.toString();
@@ -359,7 +360,7 @@ module.exports = async options => {
             loop_time = 0;
             output_error = await (async () => {
                 let output_error;
-                console.log(`looping:${loop_time}`);
+                //console.log(`looping:${loop_time}`);
                 let tmp = await getFile(options.file_stderr[i]);
                 if (tmp && tmp.data) output_error = tmp.data.toString();
                 return output_error
