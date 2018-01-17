@@ -96,7 +96,8 @@ int main(int argc, char **argv) {
 			fprintf(fresult, "Runtime Error\nwait4() = -1\n0\n0\n");
 			return 0;
 		}
-
+        long used_time = usage.ru_utime.tv_sec * 1000 + usage.ru_utime.tv_usec / 1000 + usage.ru_stime.tv_sec * 1000 +
+                                                               		        usage.ru_stime.tv_usec / 1000;
 		if (WIFEXITED(status)) {
 			// Not signaled - exited normally
 			if (WEXITSTATUS(status) != 0) {
@@ -109,7 +110,7 @@ int main(int argc, char **argv) {
 		} else {
 			// Signaled
 			int sig = WTERMSIG(status);
-			if (sig == SIGXCPU || usage.ru_utime.tv_sec > time_limit || time_limit_exceeded_killed) {
+			if (sig == SIGXCPU || used_time > time_limit || time_limit_exceeded_killed) {
 				RUNTIME_FLAG = TIME_LIMIT_EXCEEDED;
 				fprintf(fresult, "Time Limit Exceeded\nWEXITSTATUS() = %d, WTERMSIG() = %d (%s)\n", WEXITSTATUS(status),
 				        sig, strsignal(sig));
@@ -134,13 +135,15 @@ int main(int argc, char **argv) {
 		if (time_limit_exceeded_killed)
 			fprintf(fresult, "%ld\n", time_limit_to_watch * 1000000);
 		else
-			fprintf(fresult, "%ld\n", usage.ru_utime.tv_sec * 1000000 + usage.ru_utime.tv_usec);
+			fprintf(fresult, "%ld\n",used_time/*usage.ru_utime.tv_sec * 1000000 + usage.ru_utime.tv_usec*/);
 		fprintf(fresult, "%ld\n", usage.ru_maxrss);
+		/*
 		fprintf(fresult, "time:%ld memory:%ld",
 		        usage.ru_utime.tv_sec * 1000 + usage.ru_utime.tv_usec / 1000 + usage.ru_stime.tv_sec * 1000 +
 		        usage.ru_stime.tv_usec / 1000,
 		        usage.ru_maxrss
-		);
+		);*/
+		fprintf(fresult,"%d\n",RUNTIME_FLAG);
 		fclose(fresult);
 	} else {
 #ifdef LOG
@@ -204,7 +207,7 @@ int main(int argc, char **argv) {
 		else
 			freopen("/dev/null", "w", stderr);
 		//printf("start program");
-		execlp(program, program, memory_limit, memory_limit_reserve, (char *) NULL);
+		execlp(program, program, to_string(memory_limit).c_str(), to_string(memory_limit_reserve).c_str(), (char *) NULL);
 	}
 
 	return 0;

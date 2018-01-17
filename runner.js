@@ -59,8 +59,10 @@ function parseResult(result) {
         status: a[0],
         debug_info: a[1],
         time_usage: parseInt(a[2]),
-        memory_usage: parseInt(a[3]),
+        memory_usage: parseInt(a[3]),/*
         debug: a[4]
+        */
+        runtime_flag: parseInt(a[4])
     };
 }
 
@@ -240,10 +242,11 @@ module.exports = async options => {
         if (options.compile_method) {
 
             let compile_arg = options.compile_method(options.program, getSandboxedPath,...options.compile_args);
+            let cmd = [SANDBOX_COMPILE_PATH, compile_arg.join(" ")]
             let compile = await container.execAsync({
-                Cmd: [SANDBOX_COMPILE_PATH, compile_arg.join(" ")]
+                Cmd: cmd
             });
-            console.log(compile_arg);
+            console.log(cmd);
             Promise.promisifyAll(compile);
             await compile.startAsync();
             let compileDaemon;
@@ -267,7 +270,16 @@ module.exports = async options => {
             })();
             if(compile_out && compile_out.length || (compile_error && compile_error.length))
             {
-
+                container.removeAsync({
+                    force: true
+                }).then(() => {
+                }).catch(() => {
+                });
+                return {
+                    compile_out: compile_out,
+                    compile_error: compile_error,
+                    status:"compile error"
+                }
             }
         }
 
@@ -310,6 +322,21 @@ module.exports = async options => {
                 await Promise.delay(50);
             }
             _result[flipSuffix(options.file_stdin[i])] = (result = parseResult(result.toString()));
+            if(result.runtime_flag)
+            {
+                container.removeAsync({
+                    force: true
+                }).then(() => {
+                }).catch(() => {
+                });
+                return {
+                    compile_out: compile_out,
+                    compile_error: compile_error,
+                    result: _result,
+                    output_files: output_files,
+                    output_errors: output_errors
+                }
+            }
             let debug_info = result.debug_info.split().reverse().join("").split(" ")[0];
             debug_info = parseInt(debug_info);
             if (debug_info) {
@@ -347,6 +374,7 @@ module.exports = async options => {
         });
 
         return {
+            status:"OK",
             compile_out: compile_out,
             compile_error: compile_error,
             result: _result,
