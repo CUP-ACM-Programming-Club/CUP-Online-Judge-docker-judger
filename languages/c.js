@@ -1,4 +1,4 @@
-module.exports = (name, fn, version = 99, ...[options]) => {
+module.exports = (name, fn, version = 99, ...options) => {
     let _name;
     if (typeof fn === "function") {
         const _name = fn((" " + name).slice(1));

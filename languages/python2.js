@@ -1,4 +1,4 @@
-module.exports = function (name, fn, ...[options]) {
+module.exports = function (name, fn, ...options) {
     return undefined;
 };
 

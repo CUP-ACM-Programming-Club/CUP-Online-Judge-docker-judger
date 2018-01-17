@@ -4,7 +4,7 @@ const SANDBOX_GID = 1111;
 const SANDBOX_PATH = '/sandbox';
 const SANDBOX_EXEC_PATH = '/usr/bin/sandbox';
 const SANDBOX_RESULT_PATH = '/sandbox/result.txt';
-
+const SANDBOX_COMPILE_PATH = '/sandbox/compile';
 let Promise = require('bluebird');
 let Docker = require('dockerode');
 let TarStream = require('tar-stream');
@@ -138,7 +138,12 @@ module.exports = async options => {
             }
         });
         Promise.promisifyAll(container);
-
+        let pipeStream = await container.attachAsync({
+            stream:true,
+            stdout:true,
+            stderr:true
+        });
+        pipeStream.pipe(process.stdout);
         async function getFile(path) {
             for (let i = 0; i < 10; i++) {
                 try {
@@ -200,36 +205,40 @@ module.exports = async options => {
             for (let i in options.file_stdin) {
                 options.file_stdin[i] = getSandboxedPath(options.file_stdin[i]);
             }
+            if (options.file_stdout.length) {
+                for (let i in options.file_stdout) {        // Exec the program with sandbox
+                    options.file_stdout[i] = getSandboxedPath(options.file_stdout[i]);
+                }
+            }
+            else if (options.file_stdin.length) {
+                for (let i in options.file_stdin) {
+                    options.file_stdout[i] = getSandboxedPath(flipSuffix(options.file_stdin[i]) + ".out");
+                }
+            }
+            if (options.file_stderr.length) {
+                for (let i in options.file_stderr) {
+                    options.file_stderr[i] = getSandboxedPath(options.file_stderr[i]);
+                }
+            }
+            else if (options.file_stdin.length) {
+                for (let i in options.file_stdin) {
+                    options.file_stderr[i] = getSandboxedPath(flipSuffix(options.file_stdin[i]) + ".err");
+                }
+            }
         }
         else {
             options.file_stdin = [];
             options.file_stdin.push("");
+            options.file_stdout.push("/sandbox/data.out");
+            options.file_stderr.push("/sandbox/data.err");
         }
-        if (options.file_stdout.length) {
-            for (let i in options.file_stdout) {        // Exec the program with sandbox
-                options.file_stdout[i] = getSandboxedPath(options.file_stdout[i]);
-            }
-        }
-        else if (options.file_stdin.length) {
-            for (let i in options.file_stdin) {
-                options.file_stdout[i] = getSandboxedPath(flipSuffix(options.file_stdin[i]) + ".out");
-            }
-        }
-        if (options.file_stderr.length) {
-            for (let i in options.file_stderr) {
-                options.file_stderr[i] = getSandboxedPath(options.file_stderr[i]);
-            }
-        }
-        else if (options.file_stdin.length) {
-            for (let i in options.file_stdin) {
-                options.file_stderr[i] = getSandboxedPath(flipSuffix(options.file_stdin[i]) + ".err");
-            }
-        }
+        let compile_out,compile_error;
         // compile
         if (options.compile_method) {
+
             let compile_arg = options.compile_method(options.program, getSandboxedPath);
             let compile = await container.execAsync({
-                Cmd: compile_arg
+                Cmd: [SANDBOX_COMPILE_PATH,compile_arg.join(" ")]
             });
             console.log(compile_arg);
             Promise.promisifyAll(compile);
@@ -239,6 +248,19 @@ module.exports = async options => {
                 compileDaemon = await compile.inspectAsync();
                 await Promise.delay(50);
             } while (compileDaemon.Running);
+
+            compile_out=await (async ()=>{
+                let result;
+                let tmp = await getFile(SANDBOX_COMPILE_PATH+".out");
+                if (tmp && tmp.data) result = tmp.data.toString();
+                return result;
+            })();
+            compile_error = await (async()=>{
+                let result;
+                let tmp = await getFile(SANDBOX_COMPILE_PATH+".err");
+                if(tmp && tmp.data)result = tmp.data.toString();
+                return result;
+            })();
         }
 
         let output_files = {};
@@ -307,8 +329,8 @@ module.exports = async options => {
                 if (tmp && tmp.data) output_error = tmp.data.toString();
                 return output_error
             })();
-            output_files[path.basename(flipSuffix(options.file_stdin[i]))] = output_file;
-            output_errors[path.basename(flipSuffix(options.file_stdin[i]))] = output_error;
+            output_files[path.basename(flipSuffix(options.file_stdout[i]))] = output_file;
+            output_errors[path.basename(flipSuffix(options.file_stderr[i]))] = output_error;
         }
         container.removeAsync({
             force: true
@@ -317,6 +339,8 @@ module.exports = async options => {
         });
 
         return {
+            compile_out:compile_out,
+            compile_error:compile_error,
             result: _result,
             output_files: output_files,
             output_errors: output_errors
