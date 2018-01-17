@@ -175,7 +175,7 @@ int main(int argc, char **argv) {
         if (strlen(file_stderr)) freopen(file_stderr, "w", stderr);
         else freopen("/dev/null", "w", stderr);
         printf("start program");
-        execlp(program, program, NULL);
+        execlp(program, program, (char*)NULL);
     }
 
     return 0;
