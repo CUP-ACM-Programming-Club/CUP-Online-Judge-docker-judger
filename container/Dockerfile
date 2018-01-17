@@ -14,10 +14,10 @@ RUN apk add --update \
     nodejs \
     openjdk8 \
     vim
+COPY fpc-3.0.4.x86_64-linux.tar /tmp/
 RUN ln -sf "${JAVA_HOME}/bin/"* "/usr/bin/" && \
 	apk add binutils && \
     cd /tmp && \
-    wget ftp://freepascal.stack.nl/pub/mirrors/fpc/dist/${FPC_VERSION}/${FPC_ARCH}/fpc-${FPC_VERSION}.${FPC_ARCH}.tar && \
     tar xf fpc-${FPC_VERSION}.${FPC_ARCH}.tar && \
     cd fpc-${FPC_VERSION}.${FPC_ARCH} && \
     rm demo* doc* && \

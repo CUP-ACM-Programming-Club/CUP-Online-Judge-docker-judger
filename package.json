@@ -1,13 +1,13 @@
 {
-  "name": "docker-sandbox",
+  "name": "CUP-Online-Judge-docker-judger",
   "version": "0.0.1",
   "description": "Run unsafe program in docker sandbox",
   "main": "index.js",
   "repository": {
-    "url": "https://github.com/Menci/docker-sandbox",
+    "url": "https://github.com/CUP-ACM-Programming-Club/CUP-Online-Judge-docker-judger",
     "type": "git"
   },
-  "author": "Menci",
+  "author": "RyanLee",
   "license": "GPL-3.0",
   "dependencies": {
     "bluebird": "^3.4.6",

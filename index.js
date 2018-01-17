@@ -19,14 +19,15 @@ function createSubmit() {
         file_stderr: [],
         time_limit: 1,
         time_limit_reserve: 1,
-        memory_limit: 1 * 1024 * 1024,
-        memory_limit_reserve: 32 * 1024 * 1024,
+        memory_limit: 32,
+        memory_limit_reserve: 64,
         large_stack: 0,
         output_limit: 0,
         process_limit: 0,
         input_files: [],
         output_files: [],
         compile_method: undefined,
+        compile_args: [],
         setProgram(program) {
             this.program = program
         },
@@ -70,7 +71,7 @@ function createSubmit() {
             this.process_limit = parseInt(process_limit);
         },
         async pushInputFiles(...file_name) {
-            for(let i in file_name) {
+            for (let i in file_name) {
                 this.input_files.push({
                     name: path.basename(file_name[i]),
                     mode: parseInt("755", 8),
@@ -79,7 +80,7 @@ function createSubmit() {
             }
         },
         async pushOutputFiles(...file_name) {
-            for(let i in file_name) {
+            for (let i in file_name) {
                 this.output_files.push({
                     name: path.basename(file_name[i]),
                     mode: parseInt("755", 8),
@@ -93,11 +94,14 @@ function createSubmit() {
             }
         },
         async setLanguage(language, ...file) {
-            this.setCompileMethod(require(`./languages/${language}`));
-            //this.setProgram(language.toString());
+            this.setCompileMethod(require(`./compileLanguage/${language}`).compile_method);
+            require(`./compileLanguage/${language}`).init(this);
             for (let i in file) {
                 this.input_files.push(await fileToBuffer(file[i]));
             }
+        },
+        setCompileArgs(...args) {
+            this.compile_args = args;
         }
     };
 }

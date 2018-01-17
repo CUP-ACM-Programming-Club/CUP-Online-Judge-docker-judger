@@ -9,7 +9,7 @@ int main(int argc,char** argv)
         cerr<<"Args must be 2"<<endl;
         return 1;
     }
-    freopen("compile.out","w",stdout);
-    freopen("compile.err","w",stderr);
+    freopen("/sandbox/compile.out","w",stdout);
+    freopen("/sandbox/compile.err","w",stderr);
     system(argv[1]);
 }

@@ -59,7 +59,8 @@ function parseResult(result) {
         status: a[0],
         debug_info: a[1],
         time_usage: parseInt(a[2]),
-        memory_usage: parseInt(a[3])
+        memory_usage: parseInt(a[3]),
+        debug: a[4]
     };
 }
 
@@ -97,7 +98,8 @@ module.exports = async options => {
         process_limit: 0,
         input_files: [],
         output_files: [],
-        compile_method: undefined
+        compile_method: undefined,
+        compile_args:[]
     }, options);
 
 //  let container;
@@ -139,11 +141,12 @@ module.exports = async options => {
         });
         Promise.promisifyAll(container);
         let pipeStream = await container.attachAsync({
-            stream:true,
-            stdout:true,
-            stderr:true
+            stream: true,
+            stdout: true,
+            stderr: true
         });
         pipeStream.pipe(process.stdout);
+
         async function getFile(path) {
             for (let i = 0; i < 10; i++) {
                 try {
@@ -232,13 +235,13 @@ module.exports = async options => {
             options.file_stdout.push("/sandbox/data.out");
             options.file_stderr.push("/sandbox/data.err");
         }
-        let compile_out,compile_error;
+        let compile_out, compile_error;
         // compile
         if (options.compile_method) {
 
-            let compile_arg = options.compile_method(options.program, getSandboxedPath);
+            let compile_arg = options.compile_method(options.program, getSandboxedPath,...options.compile_args);
             let compile = await container.execAsync({
-                Cmd: [SANDBOX_COMPILE_PATH,compile_arg.join(" ")]
+                Cmd: [SANDBOX_COMPILE_PATH, compile_arg.join(" ")]
             });
             console.log(compile_arg);
             Promise.promisifyAll(compile);
@@ -249,18 +252,23 @@ module.exports = async options => {
                 await Promise.delay(50);
             } while (compileDaemon.Running);
 
-            compile_out=await (async ()=>{
+            compile_out = await (async () => {
                 let result;
-                let tmp = await getFile(SANDBOX_COMPILE_PATH+".out");
+                let tmp = await getFile(SANDBOX_COMPILE_PATH + ".out");
+                console.log(SANDBOX_COMPILE_PATH + ".out");
                 if (tmp && tmp.data) result = tmp.data.toString();
                 return result;
             })();
-            compile_error = await (async()=>{
+            compile_error = await (async () => {
                 let result;
-                let tmp = await getFile(SANDBOX_COMPILE_PATH+".err");
-                if(tmp && tmp.data)result = tmp.data.toString();
+                let tmp = await getFile(SANDBOX_COMPILE_PATH + ".err");
+                if (tmp && tmp.data) result = tmp.data.toString();
                 return result;
             })();
+            if(compile_out && compile_out.length || (compile_error && compile_error.length))
+            {
+
+            }
         }
 
         let output_files = {};
@@ -339,8 +347,8 @@ module.exports = async options => {
         });
 
         return {
-            compile_out:compile_out,
-            compile_error:compile_error,
+            compile_out: compile_out,
+            compile_error: compile_error,
             result: _result,
             output_files: output_files,
             output_errors: output_errors
