@@ -5,8 +5,15 @@ ENV JAVA_HOME=/usr/lib/jvm/default-jvm \
     FPC_ARCH="x86_64-linux" \
     KOTLIN_VERSION=1.2.20 \
     KOTLIN_HOME=/usr/share/kotlin
-COPY fpc-3.0.4.x86_64-linux.tar kotlin-compiler-1.2.20.zip lua.sh sandbox.cpp python2.cpp python3.cpp nodejs.cpp compile.cpp java.cpp csharp.cpp java0.policy /home/
-RUN echo "@testing http://dl-4.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories && \
+COPY lua.cpp kotlin.cpp  \
+#    fpc-3.0.4.x86_64-linux.tar kotlin-compiler-1.2.20.zip \
+     lua.sh sandbox.cpp python2.cpp python3.cpp nodejs.cpp compile.cpp java.cpp \
+     csharp.cpp java0.policy /home/
+RUN cd /home/ && \
+    wget "ftp://gd.tuwien.ac.at/languages/pascal/fpc/dist/${FPC_VERSION}/${FPC_ARCH}/fpc-${FPC_VERSION}.${FPC_ARCH}.tar" && \
+    wget "https://github.com/JetBrains/kotlin/releases/download/v${KOTLIN_VERSION}/kotlin-compiler-${KOTLIN_VERSION}.zip" && \
+    cd / && \
+    echo "@testing http://dl-4.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories && \
     apk add --update \
     python \
 	python3 \
@@ -51,6 +58,8 @@ RUN echo "@testing http://dl-4.alpinelinux.org/alpine/edge/testing" >> /etc/apk/
     apk del build-dependencies && \
     rm -rf /tmp/* /var/cache/apk/* && \
     cd / && \
+    mv /home/lua.sh /sandbox/ && \
+    chmod a+x /sandbox/lua.sh && \
     g++ -o /usr/bin/sandbox /home/sandbox.cpp -O2 && \
 	g++ -o /sandbox/python2 /home/python2.cpp -O2 && \
 	g++ -o /sandbox/python3 /home/python3.cpp -O2 && \
@@ -58,10 +67,7 @@ RUN echo "@testing http://dl-4.alpinelinux.org/alpine/edge/testing" >> /etc/apk/
 	g++ -o /sandbox/compile /home/compile.cpp -O2 && \
 	g++ -o /sandbox/java /home/java.cpp -O2 && \
 	g++ -o /sandbox/csharp /home/csharp.cpp -O2 && \
+	g++ -o /sandbox/lua /home/lua.cpp -O2 && \
+    g++ -o /sandbox/kotlin /home/kotlin.cpp -O2 && \
 	touch /sandbox/data.in
-COPY lua.cpp kotlin.cpp /sandbox/
-RUN mv /home/lua.sh /sandbox/ && \
-    chmod a+x /sandbox/lua.sh && \
-    g++ -o /sandbox/lua /sandbox/lua.cpp -O2 && \
-    g++ -o /sandbox/kotlin /sandbox/kotlin.cpp -O2
 CMD while true; do sleep 1; done

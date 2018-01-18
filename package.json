@@ -1,7 +1,7 @@
 {
   "name": "CUP-Online-Judge-docker-judger",
-  "version": "0.0.1",
-  "description": "Run unsafe program in docker sandbox",
+  "version": "1.0.0",
+  "description": "Run program in docker sandbox",
   "main": "index.js",
   "repository": {
     "url": "https://github.com/CUP-ACM-Programming-Club/CUP-Online-Judge-docker-judger",
@@ -10,8 +10,8 @@
   "author": "RyanLee",
   "license": "GPL-3.0",
   "dependencies": {
-    "bluebird": "^3.4.6",
-    "dockerode": "^2.3.1",
-    "tar-stream": "^1.5.2"
+    "bluebird": "^3.5.1",
+    "dockerode": "^2.5.3",
+    "tar-stream": "^1.5.5"
   }
 }
