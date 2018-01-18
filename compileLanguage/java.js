@@ -1,5 +1,4 @@
 module.exports = {
-    //TODO:complete java options.
     compile_method(name, fn, ...options) {
         let _name;
         if (typeof fn === "function") {

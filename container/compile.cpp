@@ -4,6 +4,7 @@
 using namespace std;
 int main(int argc,char** argv)
 {
+    chdir("/sandbox");
     if(argc<2)
     {
         cerr<<"Args must be 2"<<endl;

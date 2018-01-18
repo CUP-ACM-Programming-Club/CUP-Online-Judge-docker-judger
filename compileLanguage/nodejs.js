@@ -2,8 +2,8 @@ module.exports ={
 	compile_method(){
 		return undefined;
 	},
-	init(){
-
+	init(submit){
+		submit.pushInputFiles("Main.js");
 	}
 };
 

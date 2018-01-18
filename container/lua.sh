@@ -1,0 +1,1 @@
+luac -o Main Main.lua

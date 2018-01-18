@@ -9,7 +9,7 @@ module.exports = {
         }
         const execFile = _name.substring(0, _name.indexOf("."));
         return ["/usr/bin/g++", "-o", execFile, _name, "-fno-asm", "-Wall",
-            "-lm","-mx32","-pipe", `-std=c++${version}`, "-DONLINE_JUDGE", ...options]
+            "-lm","-pipe", `-std=c++${version}`, "-DONLINE_JUDGE", ...options]
     },
     init(submit){
         submit.setProgram("Main.cpp");

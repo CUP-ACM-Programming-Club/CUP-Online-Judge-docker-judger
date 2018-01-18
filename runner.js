@@ -246,7 +246,7 @@ module.exports = async options => {
             let compile = await container.execAsync({
                 Cmd: cmd
             });
-            //console.log(cmd);
+            console.log(cmd);
             Promise.promisifyAll(compile);
             await compile.startAsync();
             let compileDaemon;

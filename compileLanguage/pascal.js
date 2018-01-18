@@ -5,8 +5,8 @@ module.exports ={
             return ["/usr/bin/fpc", _name, "-Cs32000000", "-Sh", "-O2", "-Co", "-Ct", "-Ci", ...options]
         }
     },
-    init()
+    init(submit)
     {
-
+        submit.setProgram("Main.pas");
     }
 };

@@ -104,7 +104,7 @@ int main(int argc, char **argv) {
 			if (WEXITSTATUS(status) != 0) {
 				fprintf(fresult, "Runtime Error\nWIFEXITED - WEXITSTATUS() = %d\n", WEXITSTATUS(status));
 				RUNTIME_FLAG = RUNTIME_ERROR;
-			} else if (usage.ru_maxrss > memory_limit) {
+			} else if (usage.ru_maxrss > memory_limit * 1024) {
 				RUNTIME_FLAG = MEMORY_LIMIT_EXCEEDED;
 				fprintf(fresult, "Memory Limit Exceeded\nWEXITSTATUS() = %d, WTERMSIG() = %d (%s)\n",
 				        WEXITSTATUS(status), sig, strsignal(sig));
@@ -123,7 +123,7 @@ int main(int argc, char **argv) {
 				RUNTIME_FLAG = OUTPUT_LIMIT_EXCEEDED;
 				fprintf(fresult, "Output Limit Exceeded\nWEXITSTATUS() = %d, WTERMSIG() = %d (%s)\n",
 				        WEXITSTATUS(status), sig, strsignal(sig));
-			} else if (usage.ru_maxrss > memory_limit) {
+			} else if (usage.ru_maxrss > memory_limit * 1024) {
 				RUNTIME_FLAG = MEMORY_LIMIT_EXCEEDED;
 				fprintf(fresult, "Memory Limit Exceeded\nWEXITSTATUS() = %d, WTERMSIG() = %d (%s)\n",
 				        WEXITSTATUS(status), sig, strsignal(sig));
