@@ -303,7 +303,7 @@ module.exports = async options => {
                 options.process_limit.toString(),
                 SANDBOX_RESULT_PATH
             ];
-            //console.log(cmd);
+            console.log(cmd);
             let exec = await container.execAsync({
                 Cmd: cmd,
                 AttachStdout: true,
@@ -323,26 +323,6 @@ module.exports = async options => {
                 await Promise.delay(50);
             }
             _result[flipSuffix(options.file_stdin[i])] = (result = parseResult(result.toString()));
-            if(result.runtime_flag)
-            {
-                container.removeAsync({
-                    force: true
-                }).then(() => {
-                }).catch(() => {
-                });
-                return {
-                    compile_out: compile_out,
-                    compile_error: compile_error,
-                    result: _result,
-                    output_files: output_files,
-                    output_errors: output_errors
-                }
-            }
-            let debug_info = result.debug_info.split().reverse().join("").split(" ")[0];
-            debug_info = parseInt(debug_info);
-            if (debug_info) {
-                break;
-            }
             let output_file, loop_time = 0;
             const total_time = options.time_limit + options.time_limit_reserve;
             //console.log(total_time);
@@ -367,6 +347,22 @@ module.exports = async options => {
             })();
             output_files[path.basename(flipSuffix(options.file_stdout[i]))] = output_file;
             output_errors[path.basename(flipSuffix(options.file_stderr[i]))] = output_error;
+
+            if(result.runtime_flag)
+            {
+                container.removeAsync({
+                    force: true
+                }).then(() => {
+                }).catch(() => {
+                });
+                return {
+                    compile_out: compile_out,
+                    compile_error: compile_error,
+                    result: _result,
+                    output_files: output_files,
+                    output_errors: output_errors
+                }
+            }
         }
         container.removeAsync({
             force: true

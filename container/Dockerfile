@@ -26,11 +26,12 @@ RUN ln -sf "${JAVA_HOME}/bin/"* "/usr/bin/" && \
     rm -r /tmp/* && \
     rm /var/cache/apk/* && \
 	adduser sandbox -u 1111 -h /sandbox -D
-COPY sandbox.cpp python2.cpp python3.cpp nodejs.cpp compile.cpp /home/
+COPY sandbox.cpp python2.cpp python3.cpp nodejs.cpp compile.cpp java.cpp java0.policy /home/
 RUN g++ -o /usr/bin/sandbox /home/sandbox.cpp -O2 && \
 	g++ -o /sandbox/python2 /home/python2.cpp -O2 && \
 	g++ -o /sandbox/python3 /home/python3.cpp -O2 && \
 	g++ -o /sandbox/nodejs /home/nodejs.cpp -O2 && \
 	g++ -o /sandbox/compile /home/compile.cpp -O2 && \
+	g++ -o /sandbox/java /home/java.cpp -O2 && \
 	touch /sandbox/data.in
 CMD while true; do sleep 1; done

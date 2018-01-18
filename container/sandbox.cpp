@@ -96,13 +96,18 @@ int main(int argc, char **argv) {
 			fprintf(fresult, "Runtime Error\nwait4() = -1\n0\n0\n");
 			return 0;
 		}
-        long used_time = usage.ru_utime.tv_sec * 1000 + usage.ru_utime.tv_usec / 1000 + usage.ru_stime.tv_sec * 1000 +
-                                                               		        usage.ru_stime.tv_usec / 1000;
+		long used_time = usage.ru_utime.tv_sec * 1000 + usage.ru_utime.tv_usec / 1000 + usage.ru_stime.tv_sec * 1000 +
+		                 usage.ru_stime.tv_usec / 1000;
 		if (WIFEXITED(status)) {
 			// Not signaled - exited normally
+			int sig = WTERMSIG(status);
 			if (WEXITSTATUS(status) != 0) {
 				fprintf(fresult, "Runtime Error\nWIFEXITED - WEXITSTATUS() = %d\n", WEXITSTATUS(status));
 				RUNTIME_FLAG = RUNTIME_ERROR;
+			} else if (usage.ru_maxrss > memory_limit) {
+				RUNTIME_FLAG = MEMORY_LIMIT_EXCEEDED;
+				fprintf(fresult, "Memory Limit Exceeded\nWEXITSTATUS() = %d, WTERMSIG() = %d (%s)\n",
+				        WEXITSTATUS(status), sig, strsignal(sig));
 			} else {
 				RUNTIME_FLAG = OK;
 				fprintf(fresult, "Exited Normally\nWIFEXITED - WEXITSTATUS() = %d\n", WEXITSTATUS(status));
@@ -135,7 +140,7 @@ int main(int argc, char **argv) {
 		if (time_limit_exceeded_killed)
 			fprintf(fresult, "%ld\n", time_limit_to_watch * 1000000);
 		else
-			fprintf(fresult, "%ld\n",used_time/*usage.ru_utime.tv_sec * 1000000 + usage.ru_utime.tv_usec*/);
+			fprintf(fresult, "%ld\n", used_time/*usage.ru_utime.tv_sec * 1000000 + usage.ru_utime.tv_usec*/);
 		fprintf(fresult, "%ld\n", usage.ru_maxrss);
 		/*
 		fprintf(fresult, "time:%ld memory:%ld",
@@ -143,7 +148,7 @@ int main(int argc, char **argv) {
 		        usage.ru_stime.tv_usec / 1000,
 		        usage.ru_maxrss
 		);*/
-		fprintf(fresult,"%d\n",RUNTIME_FLAG);
+		fprintf(fresult, "%d\n", RUNTIME_FLAG);
 		fclose(fresult);
 	} else {
 #ifdef LOG
@@ -159,7 +164,7 @@ int main(int argc, char **argv) {
 			setrlimit(RLIMIT_CPU, &lim);
 		}
 
-		if (memory_limit) {
+		if (memory_limit && strcmp(program, "Main") == 0) {
 			struct rlimit lim;
 			lim.rlim_cur = (memory_limit + memory_limit_reserve) * 1024 * 1024;
 			lim.rlim_max = (memory_limit + memory_limit_reserve) * 1024 * 1024;
@@ -207,7 +212,8 @@ int main(int argc, char **argv) {
 		else
 			freopen("/dev/null", "w", stderr);
 		//printf("start program");
-		execlp(program, program, to_string(memory_limit).c_str(), to_string(memory_limit_reserve).c_str(), (char *) NULL);
+		execlp(program, program, to_string(memory_limit).c_str(), to_string(memory_limit_reserve).c_str(),
+		       (char *) NULL);
 	}
 
 	return 0;

@@ -3,16 +3,19 @@ module.exports = {
     compile_method(name, fn, ...options) {
         let _name;
         if (typeof fn === "function") {
-            _name = fn((" " + name).slice(1));
+          //  console.log(name);
+            _name = fn((" " + "Main.java").slice(1));
         }
         else {
-            _name = name;
+            _name = "Main.java";
         }
         //const execFile = _name.substring(0, _name.indexOf("."));
+        console.log(["/usr/bin/javac", ...options, "-encoding", "UTF-8", _name]);
         return ["/usr/bin/javac", ...options, "-encoding", "UTF-8", _name];
     },
     init(submit) {
-        submit.setCompileArgs(`-J-Xmx${this.memory_limit + this.memory_limit_reserve}M`,
-            `-J-XX:MaxMetaspaceSize=${this.memory_limit + this.memory_limit_reserve}`);
+        submit.setProgram("java");
+        submit.pushInputFiles("Main.java");
+        submit.setCompileArgs(`-J-Xms64M`,`-J-Xmx512M`);
     }
 };
