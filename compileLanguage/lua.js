@@ -12,6 +12,6 @@ module.exports = {
     },
     init(submit){
         submit.setProgram("lua");
-        submit.pushInputFiles("Main.lua");
+        //submit.pushInputFiles("Main.lua");
     }
 };

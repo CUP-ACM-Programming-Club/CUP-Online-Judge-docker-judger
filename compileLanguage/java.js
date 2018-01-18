@@ -14,7 +14,7 @@ module.exports = {
     },
     init(submit) {
         submit.setProgram("java");
-        submit.pushInputFiles("Main.java");
+        //submit.pushInputFiles("Main.java");
         submit.setCompileArgs(`-J-Xms64M`,`-J-Xmx512M`);
     }
 };

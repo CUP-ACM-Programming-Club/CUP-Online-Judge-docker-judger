@@ -11,6 +11,6 @@ module.exports = {
     },
     init(submit) {
         submit.setProgram("csharp");
-        submit.pushInputFiles("Main.cs");
+        //submit.pushInputFiles("Main.cs");
     }
 };

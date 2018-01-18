@@ -3,7 +3,7 @@ module.exports ={
 		return undefined;
 	},
 	init(submit){
-		submit.pushInputFiles("Main.js");
+		//submit.pushInputFiles("Main.js");
 	}
 };
 

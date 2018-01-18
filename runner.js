@@ -180,6 +180,7 @@ module.exports = async options => {
                 data: await fs.readFileAsync(options.file_stdin[i])
             })
         }
+        /*
         if (~path.basename(options.program).indexOf(".")) {
             options.input_files.push({
                 name: path.basename(options.program),
@@ -187,7 +188,7 @@ module.exports = async options => {
                 data: await fs.readFileAsync(options.program)
             });
         }
-
+        */
 
         for (let file of options.input_files) {
             file.uid = SANDBOX_UID;
