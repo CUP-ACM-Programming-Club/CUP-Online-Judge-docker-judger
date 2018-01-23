@@ -285,7 +285,7 @@ module.exports = async options => {
 				}).then(() => {
 				}).catch(() => {
 				});
-				socketMessage(options,11,0,0,0,compile_error);
+				socketMessage(options, 11, 0, 0, 0, compile_error);
 				return {
 					compile_out: compile_out,
 					compile_error: compile_error,
@@ -361,7 +361,7 @@ module.exports = async options => {
 			let _output;
 			output_files[(_output = path.basename(flipSuffix(options.file_stdout[i])))] = output_file;
 			output_errors[path.basename(flipSuffix(options.file_stderr[i]))] = output_error;
-			const compareDiff = new Promise((resolve, reject) => {
+			new Promise((resolve, reject) => {
 				let status_code;
 				if ((status_code = options.compare_fn(options.ans[_output], output_file)) - 2) {
 					reject(status_code);
@@ -371,7 +371,10 @@ module.exports = async options => {
 			}).catch(code => {
 				stop_code = 1;
 				let status_code;
-				if (code) {
+				if (~code) {
+					status_code = 9;
+				}
+				else if (code) {
 					status_code = 5;
 				}
 				else {
@@ -400,12 +403,12 @@ module.exports = async options => {
 			}
 			++pass_point;
 		}
-		let time_usage = 0,memory_usage = 0;
-		for(let i in _result){
-			time_usage = Math.max(_result[i].time_usage,time_usage);
-			memory_usage = Math.max(_result[i].memory_usage,memory_usage);
+		let time_usage = 0, memory_usage = 0;
+		for (let i in _result) {
+			time_usage = Math.max(_result[i].time_usage, time_usage);
+			memory_usage = Math.max(_result[i].memory_usage, memory_usage);
 		}
-		socketMessage(options,4,time_usage,memory_usage,pass_point);
+		socketMessage(options, 4, time_usage, memory_usage, pass_point);
 		container.removeAsync({
 			force: true
 		}).then(() => {
