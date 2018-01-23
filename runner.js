@@ -285,6 +285,7 @@ module.exports = async options => {
 				}).then(() => {
 				}).catch(() => {
 				});
+				socketMessage(options,11,0,0,0,compile_error);
 				return {
 					compile_out: compile_out,
 					compile_error: compile_error,
@@ -362,7 +363,7 @@ module.exports = async options => {
 			output_errors[path.basename(flipSuffix(options.file_stderr[i]))] = output_error;
 			const compareDiff = new Promise((resolve, reject) => {
 				let status_code;
-				if ((status_code = options.compare_fn(ans[_output], output_file)) - 2) {
+				if ((status_code = options.compare_fn(options.ans[_output], output_file)) - 2) {
 					reject(status_code);
 				}
 				resolve(status_code);
