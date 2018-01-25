@@ -3,6 +3,7 @@ module.exports = {
         return undefined;
     },
     init(submit){
+        submit.setProgram("python3");
         //submit.pushInputFiles("Main.py");
     }
 };

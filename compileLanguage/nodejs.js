@@ -3,6 +3,7 @@ module.exports ={
 		return undefined;
 	},
 	init(submit){
+		submit.setProgram("nodejs");
 		//submit.pushInputFiles("Main.js");
 	}
 };

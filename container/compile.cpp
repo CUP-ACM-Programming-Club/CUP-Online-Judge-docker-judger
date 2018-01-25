@@ -1,8 +1,12 @@
-#include <bits/stdc++.h>
-#include <cstdlib>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <signal.h>
-
+#include <pthread.h>
+#include <sys/wait.h>
+#include <sys/resource.h>
+#include <bits/stdc++.h>
 using namespace std;
 const int STANDARD_MEMORY = 1<<20;
 const pid_t SANDBOX_UID = 1111;
@@ -29,7 +33,7 @@ int main(int argc,char** argv)
     setrlimit(RLIMIT_CPU,&lim);
     lim.rlim_cur = OUTPUT_LIMIT;
     lim.rlim_max = OUTPUT_LIMIT;
-    setrlimit = (RLIMIT_FSIZE,&lim);
+    setrlimit(RLIMIT_FSIZE,&lim);
     freopen("/sandbox/compile.out","w",stdout);
     freopen("/sandbox/compile.err","w",stderr);
     system(argv[1]);
