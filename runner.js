@@ -120,7 +120,6 @@ module.exports = async options => {
 	}, options);
 */
     let container;
-
 	try {
 		// Check if the docker image exists
 		let image = Promise.promisifyAll(docker.getImage(SANDBOX_DOCKER_IMAGE));
@@ -341,11 +340,11 @@ module.exports = async options => {
 			do {
 				dataExec = await exec.inspectAsync();
 				await Promise.delay(50);
-				console.log("running");
+				//console.log("running");
 			} while (dataExec.Running);
 			let result;
 			while (!result) {
-				console.log("get result");
+				//console.log("get result");
 				let tmp = await getFile(SANDBOX_RESULT_PATH);
 				if (tmp && tmp.data) result = tmp.data.toString();
 				await Promise.delay(50);
@@ -408,7 +407,7 @@ module.exports = async options => {
 			}).catch(code => {
 				stop_code = 1;
 				let status_code;
-				if (~code) {
+				if (!~code) {
 					status_code = 9;
 				}
 				else if (code) {
@@ -453,7 +452,6 @@ module.exports = async options => {
 		}).then(() => {
 		}).catch(() => {
 		});
-
 		return {
 			status: "OK",
 			compile_out: compile_out,

@@ -9,7 +9,6 @@ module.exports = {
             _name = "Main.java";
         }
         //const execFile = _name.substring(0, _name.indexOf("."));
-        console.log(["/usr/bin/javac", ...options, "-encoding", "UTF-8", _name]);
         return ["/usr/bin/javac", ...options, "-encoding", "UTF-8", _name];
     },
     init(submit) {
