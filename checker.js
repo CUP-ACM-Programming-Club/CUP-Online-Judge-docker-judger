@@ -31,8 +31,6 @@ async function fileToRawText(...file) {
 async function compareDiff(out, user) {
     user = user.toString().trim();
     out = out.toString().trim();
-    console.log("user:"+user);
-    console.log("out:"+out);
     if (user.length > out.length * 2) {
         return -1;
     }

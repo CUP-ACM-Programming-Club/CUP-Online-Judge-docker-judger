@@ -54,14 +54,15 @@ int main(int argc, char **argv) {
 			*file_stdout = argv[3],
 			*file_stderr = argv[4],
 			*file_result = argv[12];
-	long memory_limit = parse_long(argv[7]),
+	long time_limit = parse_long(argv[5]),
+			time_limit_reserve = parse_long(argv[6]),
+			memory_limit = parse_long(argv[7]),
 			memory_limit_reserve = parse_long(argv[8]),
 			large_stack = parse_long(argv[9]),
 			output_limit = parse_long(argv[10]),
 			process_limit = parse_long(argv[11]);
-	double time_limit_reserve = atof(argv[6]),time_limit = atof(argv[5]);
 
-	time_limit_to_watch = (int)ceil(time_limit + time_limit_reserve);
+	time_limit_to_watch = time_limit + time_limit_reserve;
 
 #ifdef LOG
 	printf("Program: %s\n", program);
@@ -85,7 +86,7 @@ int main(int argc, char **argv) {
 			return -1;
 		}
 
-		if (time_limit>0) {
+		if (time_limit) {
 			pthread_t thread_id;
 			pthread_create(&thread_id, NULL, &watcher_thread, NULL);
 		}
@@ -137,7 +138,7 @@ int main(int argc, char **argv) {
 		printf("memory_usage = %ld\n", usage.ru_maxrss);
 #endif
 		if (time_limit_exceeded_killed)
-			fprintf(fresult, "%lld\n", (long long)time_limit_to_watch * 1000000);
+			fprintf(fresult, "%ld\n", time_limit_to_watch * 1000000);
 		else
 			fprintf(fresult, "%ld\n", used_time/*usage.ru_utime.tv_sec * 1000000 + usage.ru_utime.tv_usec*/);
 		fprintf(fresult, "%ld\n", usage.ru_maxrss);
@@ -156,10 +157,10 @@ int main(int argc, char **argv) {
 
 		// Child process
 
-		if (time_limit>0) {
+		if (time_limit) {
 			struct rlimit lim;
-			lim.rlim_cur = (int)(time_limit + time_limit_reserve);
-			lim.rlim_max = (int)(time_limit + time_limit_reserve);
+			lim.rlim_cur = time_limit + time_limit_reserve;
+			lim.rlim_max = time_limit + time_limit_reserve;
 			setrlimit(RLIMIT_CPU, &lim);
 		}
 

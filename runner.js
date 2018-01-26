@@ -5,6 +5,10 @@ const SANDBOX_PATH = '/sandbox';
 const SANDBOX_EXEC_PATH = '/usr/bin/sandbox';
 const SANDBOX_RESULT_PATH = '/sandbox/result.txt';
 const SANDBOX_COMPILE_PATH = '/sandbox/compile';
+const TIME_LIMIT_EXCEEDED = 1;
+const MEMORY_LIMIT_EXCEEDED = 2;
+const OUTPUT_LIMIT_EXCEEDED = 3;
+const RUNTIME_ERROR = 4;
 let Promise = require('bluebird');
 let Docker = require('dockerode');
 let TarStream = require('tar-stream');
@@ -347,8 +351,7 @@ module.exports = async options => {
 				await Promise.delay(50);
 			}
 			_result[flipSuffix(options.file_stdin[i])] = (result = parseResult(result.toString()));
-			let output_file, loop_time = 0;
-			const total_time = options.time_limit + options.time_limit_reserve;
+			let output_file;
 			//console.log(total_time);
 			output_file = await (async () => {
 				//console.log(`looping:${loop_time}`);
@@ -357,11 +360,7 @@ module.exports = async options => {
 				if (tmp && tmp.data) output_file = tmp.data.toString();
 				return output_file;
 			})();
-			if (loop_time > total_time * 4) {
-				break;
-			}
 			let output_error;
-			loop_time = 0;
 			output_error = await (async () => {
 				let output_error;
 				//console.log(`looping:${loop_time}`);
@@ -373,7 +372,32 @@ module.exports = async options => {
 			output_files[(_output = path.basename(flipSuffix(options.file_stdout[i])))] = output_file;
 			output_errors[path.basename(flipSuffix(options.file_stderr[i]))] = output_error;
 			//console.log(_output);
-			options.emit("debug", _output);
+
+			options.emit("debug", output_file);
+			options.emit("debug", output_error);
+            const runtime_flag = parseInt(result.runtime_flag);
+            if(runtime_flag){
+            	stop_code = 1;
+            	options.emit("debug",result);
+            	//console.log(result);
+                switch (runtime_flag){
+                    case TIME_LIMIT_EXCEEDED:
+                        socketMessage(options,7,options.time_limit*1000,parseInt(result.memory_usage),pass_point);
+                        break;
+                    case MEMORY_LIMIT_EXCEEDED:
+                        socketMessage(options,8,result.time_usage,options.memory_limit*1024,pass_point);
+                        break;
+                    case OUTPUT_LIMIT_EXCEEDED:
+                        socketMessage(options,9,parseInt(result.time_usage),parseInt(result.memory_usage),pass_point);
+                        break;
+                    case RUNTIME_ERROR:
+                        socketMessage(options,10,parseInt(result.time_usage),parseInt(result.memory_usage),pass_point);
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            }
 			await new Promise(async (resolve, reject) => {
 				let status_code;
 				if (options.compare_fn && (status_code = await options.compare_fn(options.answer_file[_output], output_files[_output])) - 2) {
@@ -400,12 +424,7 @@ module.exports = async options => {
 				}
 				socketMessage(options, status_code, time_usage, memory_usage, pass_point);
 			});
-			if (stop_code || result.runtime_flag) {
-				container.removeAsync({
-					force: true
-				}).then(() => {
-				}).catch(() => {
-				});
+			if (stop_code || runtime_flag) {
 				return {
 					compile_out: compile_out,
 					compile_error: compile_error,
@@ -427,7 +446,8 @@ module.exports = async options => {
 			test_run_result = output_files["custominput"];
 			//console.log(output_files);
 		}
-		socketMessage(options, 4, time_usage, memory_usage, pass_point, "", test_run_result);
+		if(!stop_code)
+			socketMessage(options, 4, time_usage, memory_usage, pass_point, "", test_run_result);
 		container.removeAsync({
 			force: true
 		}).then(() => {
