@@ -13,6 +13,6 @@ module.exports = {
     },
     init(submit) {
         submit.setProgram("kotlin");
-        submit.pushInputFiles("Main.kt");
+        //submit.pushInputFiles("Main.kt");
     }
 };

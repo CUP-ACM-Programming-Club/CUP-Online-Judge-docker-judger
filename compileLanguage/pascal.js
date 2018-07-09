@@ -7,6 +7,6 @@ module.exports ={
     },
     init(submit)
     {
-        submit.setProgram("Main.pas");
+        //submit.setProgram("Main.pas");
     }
 };

@@ -11,6 +11,6 @@ module.exports = {
         return ["/usr/bin/go","build", "-o", execFile, _name, ...options]
     },
     init(submit){
-        submit.setProgram("Main.go");
+        //submit.setProgram("Main.go");
     }
 };

@@ -3,7 +3,8 @@ module.exports = {
         return undefined;
     },
     init(submit){
-        submit.pushInputFiles("Main.py");
+        submit.setProgram("python2");
+        //submit.pushInputFiles("Main.py");
     }
 };
 
